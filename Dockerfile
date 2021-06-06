@@ -2,8 +2,8 @@ FROM python:3.9-slim-buster
 
 RUN apt-get update && \
     apt-get -y install cron busybox
-
-RUN printenv | grep -v "no_proxy" >> /etc/environment
+    
+RUN printenv | sed 's/^\(.*\)$/export \1/g' > /root/project_env.sh
 
 COPY requirements.txt /
 
