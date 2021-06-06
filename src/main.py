@@ -8,18 +8,17 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from zipfile import ZipFile
 from loguru import logger
-from dotenv import dotenv_values
+# from dotenv import dotenv_values
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client.domain.write_precision import WritePrecision
 
 logger.info("Scraper Start")
 
-## Import Env File
-config = dotenv_values(".env")
-INFLUX_BUCKET = config["INFLUX_BUCKET"]
-INFLUX_ORG = config["INFLUX_ORG"]
-INFLUX_TOKEN = config["INFLUX_TOKEN"]
-INFLUX_URL = config["INFLUX_URL"]
+## Import Env Values from OS
+INFLUX_BUCKET = os.getenv("INFLUX_BUCKET", "default_bucket")
+INFLUX_ORG = os.getenv("INFLUX_ORG", "default_org")
+INFLUX_TOKEN = os.getenv("INFLUX_TOKEN","default_token")
+INFLUX_URL = os.getenv("INFLUX_URL", "localhost:8086")
 
 # Setup Influx Client
 client = influxdb_client.InfluxDBClient(
