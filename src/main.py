@@ -19,7 +19,7 @@ logger.info("Scraper Start")
 INFLUX_BUCKET = os.getenv("INFLUX_BUCKET", "default_bucket")
 INFLUX_ORG = os.getenv("INFLUX_ORG", "default_org")
 INFLUX_TOKEN = os.getenv("INFLUX_TOKEN","default_token")
-INFLUX_URL = os.getenv("INFLUX_URL", "localhost:8086")
+INFLUX_URL = os.getenv("INFLUX_URL", "http://localhost:8086")
 
 # Setup Influx Client
 client = influxdb_client.InfluxDBClient(
@@ -103,7 +103,7 @@ for unit in unit_loads.items():
                     "unit", str(unit[0])
                 ).field(
                     "MW", unit[1]
-                # ).time(
+                # ).time(2
                 #     s_time
                 )
             )

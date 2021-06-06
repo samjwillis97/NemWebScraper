@@ -7,10 +7,13 @@ COPY requirements.txt /
 
 RUN pip install -r /requirements.txt
 
-COPY src/main.py /app/main
-RUN chmod +x /app/main
+COPY src/ /app
+RUN chmod +x /app/main.py
 
 COPY cronpy /tmp/root.crontab
 RUN crontab /tmp/root.crontab
+
+COPY run_python.sh /app/run_python.sh
+RUN chmod +x /app/run_python.sh
 
 CMD busybox syslogd -C; cron -L 2 -f
