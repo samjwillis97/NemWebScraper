@@ -10,4 +10,4 @@ RUN pip install -r /requirements.txt
 COPY src/ /app
 COPY cronpy /var/spool/cron/crontabs/root
 
-CMD ["python3", "/app/main.py"]
+CMD cron -l 2 -f
