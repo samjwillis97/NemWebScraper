@@ -8,7 +8,6 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from zipfile import ZipFile
 from loguru import logger
-# from dotenv import dotenv_values
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client.domain.write_precision import WritePrecision
 

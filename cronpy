@@ -1,1 +1,1 @@
-5 * * * * python3 /app/main.py > /dev/console
+*/5 * * * * python3 -u /app/main.py
