@@ -6,7 +6,7 @@ Intended to be used in a docker container and feed to InfluxDB container.
 
 ## Docker Compose
 
-```docker
+```yaml
 nemweb:
     image: samjwillis/nemweb_scraper:latest
     container_name: nemweb
