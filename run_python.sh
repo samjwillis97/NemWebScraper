@@ -2,4 +2,4 @@
 cd "$(dirname "$0")";
 CWD="$(pwd)"
 echo $CWD
-python /app/main
+python /app/main.py
