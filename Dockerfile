@@ -13,15 +13,15 @@ COPY src/ /app
 RUN chmod +x /app/main.py
 
 # Setup Cron Job
-COPY cronpy /tmp/root.crontab
+COPY scripts/crontab /tmp/root.crontab
 RUN crontab /tmp/root.crontab
 
 # Copy Shell script for running Python
-COPY run_python.sh /run_python.sh
+COPY scripts/run_python.sh /run_python.sh
 RUN chmod +x /run_python.sh
 
 # Copy Entrypoint Shell Script
-COPY entrypoint.sh /entrypoint.sh
+COPY scripts/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 CMD /entrypoint.sh
