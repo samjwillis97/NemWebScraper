@@ -11,6 +11,8 @@ from loguru import logger
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client.domain.write_precision import WritePrecision
 
+logger.add("file_{time}.log", retention="2 days")
+
 logger.info("Scraper Start")
 
 ## Import Env Values from OS

@@ -7,8 +7,8 @@ COPY requirements.txt /
 
 RUN pip install -r /requirements.txt
 
-COPY src/ /app
-RUN chmod +x /app/main.py
+COPY src/main.py /app/main
+RUN chmod +x /app/main
 
 COPY cronpy /tmp/root.crontab
 RUN crontab /tmp/root.crontab
