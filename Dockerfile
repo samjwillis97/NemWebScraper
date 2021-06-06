@@ -8,6 +8,9 @@ COPY requirements.txt /
 RUN pip install -r /requirements.txt
 
 COPY src/ /app
-COPY cronpy /var/spool/cron/crontabs/root
+RUN chmod +x /app/main.py
+
+COPY cronpy /tmp/root.crontab
+RUN crontab /tmp/root.crontab
 
 CMD busybox syslogd -C; cron -L 2 -f
