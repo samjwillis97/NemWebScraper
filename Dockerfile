@@ -1,7 +1,7 @@
 FROM python:3.9-slim-buster
 
 RUN apt-get update && \
-    apt-get -y install cron crontab crond
+    apt-get -y install cron
 
 COPY requirements.txt /
 
