@@ -229,7 +229,7 @@ def send_nemweb_pl_to_influxdb(influx_write_api, pricing):
             if (isinstance(region[0], str) and region[0] != "Time"):
                 for key, value in region[1].items():
                     if key == 'Price':
-                        unit = 'Price'
+                        unit = '$/MWh'
                     else:
                         unit = 'MW'
                     
