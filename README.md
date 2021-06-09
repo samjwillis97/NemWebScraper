@@ -13,6 +13,8 @@ nemweb:
     networks:
         - default
     environment:
+        - DEBUG=
+        - CLEAR_DBM_ON_START=
         - INFLUX_ORG=
         - INFLUX_BUCKET=
         - INFLUX_URL=
