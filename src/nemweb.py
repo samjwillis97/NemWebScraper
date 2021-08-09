@@ -32,18 +32,21 @@ class NemWebPage():
     # gets url of recent zip file from url
     def GetRecentZipUrl(self):
         ## Create URL and Download Page
-        url = self._base_url + self.url_ext
-        r = requests.get(url)
+        try:
+            url = self._base_url + self.url_ext
+            r = requests.get(url)
 
-        # BS4 OBject
-        source = BeautifulSoup(r.text, "html.parser")
+            # BS4 OBject
+            source = BeautifulSoup(r.text, "html.parser")
 
-        # Get Final A Element and Create a Download URL
-        dl_url_ext = source.find_all('a')[-1].get('href')
-        self.zip_url = self._base_url + dl_url_ext[1:]
+            # Get Final A Element and Create a Download URL
+            dl_url_ext = source.find_all('a')[-1].get('href')
+            self.zip_url = self._base_url + dl_url_ext[1:]
 
-        if DEBUG:
-            logger.debug(f"{self.__class__.__name__} - Recent Zip URL: {self.zip_url}")
+            if DEBUG:
+                logger.debug(f"{self.__class__.__name__} - Recent Zip URL: {self.zip_url}")
+        except IndexError:
+            logger.warning("Error parsing webpage")
 
     # if zip is not in DBM returns true
     def IsNewZip(self):
