@@ -6,7 +6,7 @@ import influxdb_client
 import pandas as pd
 
 from bs4 import BeautifulSoup
-from zipfile import ZipFile
+from zipfile import ZipFile, BadZipFile
 from loguru import logger
 from pprint import pprint
 
@@ -77,11 +77,14 @@ class NemWebPage():
     # unzips file at zip_path
     def Unzip(self):
         if (self.zip_path is not None) and (os.path.exists(self.zip_path)):
-            with ZipFile(self.zip_path, 'r') as zipObj:
-                zipObj.extractall(self._temp_dir)
-                self.csv_path = os.path.join(self._temp_dir, zipObj.namelist()[0])
-                if DEBUG:
-                    logger.debug(f"{self.__class__.__name__} - CSV Located at {self.csv_path}")
+            try:
+                with ZipFile(self.zip_path, 'r') as zipObj:
+                    zipObj.extractall(self._temp_dir)
+                    self.csv_path = os.path.join(self._temp_dir, zipObj.namelist()[0])
+                    if DEBUG:
+                        logger.debug(f"{self.__class__.__name__} - CSV Located at {self.csv_path}")
+            except BadZipFile:
+                logger.warning(f"Bad zip file.")
         else:
             if DEBUG:
                 logger.debug(f"{self.__class__.__name__} - No File Path or No Zip Found")
