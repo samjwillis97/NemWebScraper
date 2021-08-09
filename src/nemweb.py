@@ -151,7 +151,7 @@ class NemWebLoads(NemWebPage):
                         ).tag(
                             "unit", str(row[1]['Unit'])
                         ).field(
-                            "MW", str(row[1]['MW'])
+                            "MW", float(row[1]['MW'])
                         )
                     )
             self.influx_points = batch
@@ -189,7 +189,7 @@ class NemWebPriceAndGen(NemWebPage):
             gen_dict = df_gen.to_dict('index')
 
             for index, obj in gen_dict.items():
-                gen_dict[index] = obj | price_dict[index]
+                gen_dict[index] = {**obj,  **price_dict[index]}
             
             self.csv_df = df_price.from_dict(gen_dict, orient='index')
 
@@ -210,11 +210,15 @@ class NemWebPriceAndGen(NemWebPage):
 
                             if key == 'Price':
                                 unit = "$/MWh"
+                                meas = "price"
                             else:
+                                meas = "generation"
                                 unit ="MW"
                             
                             batch.append(influxdb_client.Point(
-                                    region[1]['Region']
+                                    meas
+                                ).tag(
+                                    "state", region[1]['Region']
                                 ).tag(
                                     "unit", unit
                                 ).field(
