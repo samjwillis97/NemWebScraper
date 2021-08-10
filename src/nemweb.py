@@ -12,6 +12,15 @@ from pprint import pprint
 
 from load_env import DBM_STORE, DEBUG
 
+def check_error(func):
+    def wrapper(*args):
+        if not args[0].error:
+            return func(*args)
+        else:
+            return
+    return wrapper
+
+
 class NemWebPage():
     _base_url = "http://nemweb.com.au/" # Reports/Current/Dispatch_SCADA/
     _temp_dir = tempfile.gettempdir()
@@ -28,8 +37,10 @@ class NemWebPage():
         self.csv_df = None
         self.csv_dict = None
         self.influx_points = None
+        self.error = False
 
     # gets url of recent zip file from url
+    @check_error
     def GetRecentZipUrl(self):
         ## Create URL and Download Page
         try:
@@ -46,9 +57,11 @@ class NemWebPage():
             if DEBUG:
                 logger.debug(f"{self.__class__.__name__} - Recent Zip URL: {self.zip_url}")
         except IndexError:
+            self.error = True
             logger.warning("Error parsing webpage")
 
     # if zip is not in DBM returns true
+    @check_error
     def IsNewZip(self):
         with dbm.open(DBM_STORE, 'c') as db:
             try:
@@ -62,10 +75,11 @@ class NemWebPage():
                     return False
             except:
                 logger.error(f"{self.__class__.__name__} - Url does not exist in DBM")
-                db[self.url_ext] = self.zip_url
+                db[str(self.url_ext)] = self.zip_url
                 return True
 
     # downloads zip if it is new
+    @check_error
     def DownloadZip(self):
         if (self.IsNewZip()):
             r = requests.get(self.zip_url, stream=True)
@@ -78,6 +92,7 @@ class NemWebPage():
                 logger.debug(f"{self.__class__.__name__} - Zip Downloaded")
 
     # unzips file at zip_path
+    @check_error
     def Unzip(self):
         if (self.zip_path is not None) and (os.path.exists(self.zip_path)):
             try:
@@ -87,12 +102,15 @@ class NemWebPage():
                     if DEBUG:
                         logger.debug(f"{self.__class__.__name__} - CSV Located at {self.csv_path}")
             except BadZipFile:
+                self.error = True
                 logger.warning(f"Bad zip file.")
         else:
+            self.error = True
             if DEBUG:
                 logger.debug(f"{self.__class__.__name__} - No File Path or No Zip Found")
 
     # Deletes files present at zip_path and csv_path
+    @check_error
     def DeleteFiles(self):
         if DEBUG:
             logger.debug(f"{self.__class__.__name__} - Deleting Files")
@@ -102,6 +120,7 @@ class NemWebPage():
             os.remove(self.csv_path)
 
 
+    @check_error
     def DFtoDict(self):
         if self.csv_df is not None:
             self.csv_dict = self.csv_df.to_dict('index')
@@ -111,14 +130,17 @@ class NemWebPage():
                 logger.debug(self.csv_dict)
 
 
+    @check_error
     def CSVtoDF(self):
         pass
 
 
+    @check_error
     def DictToInflux(self):
         pass
     
 
+    @check_error
     def DownloadAndProcess(self):
         if DEBUG:
             logger.debug(f"{self.__class__.__name__} - Starting Download and Process")
@@ -133,6 +155,7 @@ class NemWebPage():
 
 
 class NemWebLoads(NemWebPage):
+    @check_error
     def CSVtoDF(self):
         if self.csv_path is not None:
             df = pd.read_csv(
@@ -147,6 +170,7 @@ class NemWebLoads(NemWebPage):
 
             self.csv_df = df
 
+    @check_error
     def DictToInflux(self):
         if self.csv_dict is not None:
             batch = []
@@ -164,6 +188,7 @@ class NemWebLoads(NemWebPage):
 
 
 class NemWebPriceAndGen(NemWebPage):
+    @check_error
     def CSVtoDF(self):
         if self.csv_path is not None:
             if DEBUG:
@@ -203,6 +228,7 @@ class NemWebPriceAndGen(NemWebPage):
                 logger.debug(f"{self.__class__.__name__} - Printing DF")
                 logger.debug(self.csv_df)
 
+    @check_error
     def DictToInflux(self):
         if self.csv_dict is not None:
             if DEBUG:
