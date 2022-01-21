@@ -20,3 +20,8 @@ nemweb:
         - INFLUX_URL=
         - INFLUX_TOKEN=
 ```
+
+## Unit Identification
+
+See: http://www.whit.com.au/aemo-registered-participants/
+Make this into a map
