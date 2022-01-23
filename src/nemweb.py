@@ -1,17 +1,14 @@
-import datetime
-
 import requests
 import tempfile
 import dbm
 import os
 import influxdb_client
+import sqlite3
 import pandas as pd
 
 from bs4 import BeautifulSoup
 from zipfile import ZipFile, BadZipFile
 from loguru import logger
-from influxdb_client import WritePrecision
-from pprint import pprint
 
 from load_env import DBM_STORE, DEBUG
 
@@ -26,7 +23,7 @@ def check_error(func):
 
 
 class NemWebPage:
-    _base_url = "http://nemweb.com.au/" # Reports/Current/Dispatch_SCADA/
+    _base_url = "http://nemweb.com.au/"  # Reports/Current/Dispatch_SCADA/
     _temp_dir = tempfile.gettempdir()
     _temp_zip = _temp_dir + "/nemtemp.zip"
     _dbm_store = 'file_store'
@@ -44,8 +41,8 @@ class NemWebPage:
 
     # gets url of recent zip file from url
     @check_error
-    def GetRecentZipUrl(self):
-        ## Create URL and Download Page
+    def get_recent_zip_url(self):
+        # Create URL and Download Page
         try:
             url = self._base_url + self.url_ext
             r = requests.get(url)
@@ -65,7 +62,7 @@ class NemWebPage:
 
     # if zip is not in DBM returns true
     @check_error
-    def IsNewZip(self):
+    def is_new_zip(self):
         with dbm.open(DBM_STORE, 'c') as db:
             try:
                 if db[self.url_ext].decode('UTF-8') != self.zip_url:
@@ -83,8 +80,8 @@ class NemWebPage:
 
     # downloads zip if it is new
     @check_error
-    def DownloadZip(self):
-        if self.IsNewZip():
+    def download_zip(self):
+        if self.is_new_zip():
             r = requests.get(self.zip_url, stream=True)
             with open(self._temp_zip, 'wb') as fd:
                 for chunk in r.iter_content(chunk_size=128):
@@ -96,7 +93,7 @@ class NemWebPage:
 
     # unzips file at zip_path
     @check_error
-    def Unzip(self):
+    def unzip(self):
         if (self.zip_path is not None) and (os.path.exists(self.zip_path)):
             try:
                 with ZipFile(self.zip_path, 'r') as zipObj:
@@ -114,7 +111,7 @@ class NemWebPage:
 
     # Deletes files present at zip_path and csv_path
     @check_error
-    def DeleteFiles(self):
+    def delete_files(self):
         if DEBUG:
             logger.debug(f"{self.__class__.__name__} - Deleting Files")
         if self.zip_path is not None:
@@ -122,9 +119,8 @@ class NemWebPage:
         if self.csv_path is not None:
             os.remove(self.csv_path)
 
-
     @check_error
-    def DFtoDict(self):
+    def df_to_dict(self):
         if self.csv_df is not None:
             self.csv_dict = self.csv_df.to_dict('index')
             if DEBUG:
@@ -133,30 +129,30 @@ class NemWebPage:
                 logger.debug(self.csv_dict)
 
     @check_error
-    def CSVtoDF(self):
+    def csv_to_df(self):
         pass
 
     @check_error
-    def DictToInflux(self):
+    def dict_to_influx(self):
         pass
 
     @check_error
-    def DownloadAndProcess(self):
+    def download_and_process(self):
         if DEBUG:
             logger.debug(f"{self.__class__.__name__} - Starting Download and Process")
 
-        self.GetRecentZipUrl()
-        self.DownloadZip()
-        self.Unzip()
-        self.CSVtoDF()
-        self.DFtoDict()
-        self.DeleteFiles()
-        self.DictToInflux()
+        self.get_recent_zip_url()
+        self.download_zip()
+        self.unzip()
+        self.csv_to_df()
+        self.df_to_dict()
+        self.delete_files()
+        self.dict_to_influx()
 
 
 class NemWebLoads(NemWebPage):
     @check_error
-    def CSVtoDF(self):
+    def csv_to_df(self):
         if self.csv_path is not None:
             df = pd.read_csv(
                 self.csv_path,
@@ -169,7 +165,7 @@ class NemWebLoads(NemWebPage):
             self.csv_df = df
 
     @check_error
-    def DictToInflux(self):
+    def dict_to_influx(self):
         if self.csv_dict is not None:
             batch = []
             for row in self.csv_dict.items():
@@ -187,7 +183,7 @@ class NemWebLoads(NemWebPage):
 
 class NemWebSolar(NemWebPage):
     @check_error
-    def CSVtoDF(self):
+    def csv_to_df(self):
         if self.csv_path is not None:
             df = pd.read_csv(
                 self.csv_path,
@@ -200,7 +196,7 @@ class NemWebSolar(NemWebPage):
             self.csv_df = df
 
     @check_error
-    def DictToInflux(self):
+    def dict_to_influx(self):
         if self.csv_dict is not None:
             batch = []
             for row in self.csv_dict.items():
@@ -221,7 +217,7 @@ class NemWebSolar(NemWebPage):
 
 class NemWebDemand(NemWebPage):
     @check_error
-    def CSVtoDF(self):
+    def csv_to_df(self):
         if self.csv_path is not None:
             df = pd.read_csv(
                 self.csv_path,
@@ -234,7 +230,7 @@ class NemWebDemand(NemWebPage):
             self.csv_df = df
 
     @check_error
-    def DictToInflux(self):
+    def dict_to_influx(self):
         if self.csv_dict is not None:
             batch = []
             for row in self.csv_dict.items():
@@ -252,75 +248,3 @@ class NemWebDemand(NemWebPage):
                         # )
                     )
             self.influx_points = batch
-
-# class NemWebPriceAndGen(NemWebPage):
-#     @check_error
-#     def CSVtoDF(self):
-#         if self.csv_path is not None:
-#             if DEBUG:
-#                 logger.debug(f"{self.__class__.__name__} - Converting CSV to DF")
-#
-#             df_price = pd.read_csv(
-#                 self.csv_path,
-#                 skiprows=[0,1,2,3,4,5,6,7,8],
-#                 usecols=[4,6,8],
-#                 names=['Time', 'Region', 'Price'],
-#                 parse_dates=[0],
-#                 nrows=5
-#             )
-#             df_price.dropna()
-#             df_price.sort_values(by='Region', inplace=True)
-#             price_dict = df_price.to_dict('index')
-#
-#             df_gen = pd.read_csv(
-#                 self.csv_path,
-#                 skiprows=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14],
-#                 usecols=[4,6,8,9,10],
-#                 names=['Time', 'Region', 'TotalDemand', 'TotalGen', 'AvailGen'],
-#                 parse_dates=[0],
-#                 nrows=5
-#             )
-#
-#             df_gen.dropna()
-#             df_gen.sort_values(by='Region', inplace=True)
-#             gen_dict = df_gen.to_dict('index')
-#
-#             for index, obj in gen_dict.items():
-#                 gen_dict[index] = {**obj,  **price_dict[index]}
-#
-#             self.csv_df = df_price.from_dict(gen_dict, orient='index')
-#
-#             if DEBUG:
-#                 logger.debug(f"{self.__class__.__name__} - Printing DF")
-#                 logger.debug(self.csv_df)
-#
-#     @check_error
-#     def DictToInflux(self):
-#         if self.csv_dict is not None:
-#             if DEBUG:
-#                 logger.debug(f"{self.__class__.__name__} - Converting Dict to Influx Points")
-#
-#             batch = []
-#             for region in self.csv_dict.items():
-#                 if (isinstance(region[1]['Region'], str)):
-#                     for key, value in region[1].items():
-#                         if key != 'Time' and key != 'Region':
-#
-#                             if key == 'Price':
-#                                 unit = "$/MWh"
-#                                 meas = "price"
-#                             else:
-#                                 meas = "generation"
-#                                 unit ="MW"
-#
-#                             batch.append(influxdb_client.Point(
-#                                     meas
-#                                 ).tag(
-#                                     "state", region[1]['Region']
-#                                 ).tag(
-#                                     "unit", unit
-#                                 ).field(
-#                                     key, float(value)
-#                                 )
-#                             )
-#             self.influx_points = batch

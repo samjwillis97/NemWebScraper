@@ -141,3 +141,4 @@ cython_debug/
 .env
 *file_store
 src/file_store.db
+data.sql

@@ -15,6 +15,7 @@ nemweb:
     environment:
         - DEBUG=
         - CLEAR_DBM_ON_START=
+        - SQLITE_FILE=
         - INFLUX_ORG=
         - INFLUX_BUCKET=
         - INFLUX_URL=
@@ -23,5 +24,7 @@ nemweb:
 
 ## Unit Identification
 
-See: http://www.whit.com.au/aemo-registered-participants/
+See: 
+    - http://www.whit.com.au/aemo-registered-participants/
+    - https://www.aemo.com.au/-/media/Files/Electricity/NEM/Participant_Information/NEM-Registration-and-Exemption-List.xls
 Make this into a map
