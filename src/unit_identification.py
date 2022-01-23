@@ -1,4 +1,3 @@
-import logging
 import os
 import tempfile
 import requests
@@ -79,15 +78,12 @@ class UnitID:
     def _write_to_db(self):
         for index, row in self._df.iterrows():
             if row["Dispatch Type"] == "Generator" and row["DUID"] != "-":
-                select_query = f"""
-                    SELECT id FROM units WHERE duid="{row["DUID"]}"
-                """
-                rows = self._cursor.execute(select_query)
                 row = self._sanitize_row(row)
-                if len(rows.fetchall()) == 0:
-                    self._insert_db_row(row)
-                else:
-                    self._update_db_row(row)
+                if row is not None:
+                    if self._duid_exist_in_db(row["DUID"]):
+                        self._update_db_row(row)
+                    else:
+                        self._insert_db_row(row)
 
     @check_error
     def _delete_xls(self):
@@ -99,19 +95,49 @@ class UnitID:
         if row["Max Cap (MW)"] == "-":
             capacity = 0
         row["Max Cap (MW)"] = capacity
-
         if isinstance(row["Station Name"], str):
             row["Station Name"] = row["Station Name"].replace('"', "").strip()
+            row["Station Name"] = " ".join([
+                word.capitalize()
+                for word in row["Station Name"].split(" ")
+            ])
+        else:
+            return None
         if isinstance(row["DUID"], str):
             row["DUID"] = row["DUID"].strip()
+        else:
+            return None
         if isinstance(row["Region"], str):
             row["Region"] = row["Region"].strip().upper()
+        else:
+            return None
         if isinstance(row["Fuel Source - Descriptor"], str):
             row["Fuel Source - Descriptor"] = row["Fuel Source - Descriptor"].strip()
+            row["Fuel Source - Descriptor"] = " ".join([
+                word.capitalize()
+                for word in row["Fuel Source - Descriptor"].split(" ")
+            ])
+        else:
+            return None
         if isinstance(row["Technology Type - Primary"], str):
             row["Technology Type - Primary"] = row["Technology Type - Primary"].strip()
-
+            row["Technology Type - Primary"] = " ".join([
+                word.capitalize()
+                for word in row["Technology Type - Primary"].split(" ")
+            ])
+        else:
+            return None
         return row
+
+    @check_error
+    def _duid_exist_in_db(self, duid):
+        select_query = f"""
+            SELECT id FROM units WHERE duid="{duid}"
+        """
+        rows = self._cursor.execute(select_query)
+        if len(rows.fetchall()) == 0:
+            return False
+        return True
 
     @check_error
     def _insert_db_row(self, row):
@@ -158,6 +184,9 @@ class UnitID:
         logger.debug(update_query)
         self._cursor.executescript(update_query)
         self._conn.commit()
+
+    def duid_exist(self, duid):
+        return self._duid_exist_in_db(duid)
 
     # SELECT DISTINCT region_id
     # FROM units
