@@ -30,7 +30,6 @@ class NemWebPage:
 
     def __init__(self, url_ext):
         self.url_ext = url_ext
-
         self.zip_url = None
         self.zip_path = None
         self.csv_path = None
@@ -169,6 +168,8 @@ class NemWebLoads(NemWebPage):
         if self.csv_dict is not None:
             batch = []
             for row in self.csv_dict.items():
+                # if not self.id_service.duid_exist(row[1]['Unit']):
+                #     self.id_service.update()
                 if isinstance(row[1]['Unit'], str):
                     batch.append(influxdb_client.Point(
                             "generation"

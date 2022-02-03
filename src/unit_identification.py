@@ -38,7 +38,7 @@ class UnitID:
     def _create_tables(self):
         unit_table_create_query = """
             CREATE TABLE IF NOT EXISTS units (
-                id int PRIMARY KEY,
+                id int PRIMARY KEY AUTOINCREMENT,
                 duid string UNIQUE NOT NULL,
                 station_name string NOT NULL,
                 region_id string NOT NULL,
@@ -136,6 +136,8 @@ class UnitID:
         """
         rows = self._cursor.execute(select_query)
         if len(rows.fetchall()) == 0:
+            if DEBUG:
+                logger.debug(f"{duid} doesn't exist")
             return False
         return True
 
@@ -158,7 +160,6 @@ class UnitID:
                 {row["Max Cap (MW)"]}
             )
         """
-        logger.debug(insert_query)
         self._cursor.executescript(insert_query)
         self._conn.commit()
 
@@ -181,7 +182,6 @@ class UnitID:
             )
             WHERE duid="{row["DUID"]}"
         """
-        logger.debug(update_query)
         self._cursor.executescript(update_query)
         self._conn.commit()
 

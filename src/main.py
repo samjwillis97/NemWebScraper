@@ -32,8 +32,8 @@ if __name__ == "__main__":
         INFLUX_ORG
     )
 
-    id_service = unit_identification.UnitID()
-    id_service.update()
+    idService = unit_identification.UnitID()
+    idService.update()
 
     s.enter(1, 1, acquire_and_process_nemweb, (influxClient,))
     s.run()
