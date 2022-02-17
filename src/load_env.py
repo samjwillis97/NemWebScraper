@@ -20,7 +20,6 @@ if not is_docker():
 
 # Read Env Values
 DEBUG = bool(strtobool(os.getenv("DEBUG", False)))
-CLEAR_DBM_ON_START = bool(strtobool(os.getenv("CLEAR_DBM_ON_START", False)))
 INFLUX_BUCKET = os.getenv("INFLUX_BUCKET", "default_bucket")
 INFLUX_ORG = os.getenv("INFLUX_ORG", "default_org")
 INFLUX_TOKEN = os.getenv("INFLUX_TOKEN", "default_token")
@@ -30,7 +29,3 @@ if DEBUG:
     logger.info("DEBUG Mode Started")
 
 DBM_STORE = '/data/dbm_store'
-if CLEAR_DBM_ON_START:
-    logger.info("Clearing DBM")
-    with dbm.open(DBM_STORE, 'n') as db:
-        pass
