@@ -38,7 +38,7 @@ class UnitID:
     def _create_tables(self):
         unit_table_create_query = """
             CREATE TABLE IF NOT EXISTS units (
-                id int PRIMARY KEY AUTOINCREMENT,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 duid string UNIQUE NOT NULL,
                 station_name string NOT NULL,
                 region_id string NOT NULL,
