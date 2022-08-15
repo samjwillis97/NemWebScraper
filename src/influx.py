@@ -1,8 +1,6 @@
 from loguru import logger
 import influxdb_client
-import sys
 from influxdb_client.client.write_api import SYNCHRONOUS
-from influxdb_client.domain.write_precision import WritePrecision
 
 
 class InfluxDB:
@@ -29,7 +27,6 @@ class InfluxDB:
                     bucket,
                     org,
                     data,
-                    # write_precision=Writ2ePrecision.S
                 )
                 logger.success("Data Sent to InfluxDB")
             except:

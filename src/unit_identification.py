@@ -6,7 +6,7 @@ import pandas as pd
 from sqlite3 import Error
 from loguru import logger
 
-from load_env import DEBUG
+from load_env import DEBUG, DATA_DIR
 
 
 def check_error(func):
@@ -23,14 +23,14 @@ class UnitID:
         self.error = False
         self._df = None
         self._url = "https://www.aemo.com.au/-/media/Files/Electricity/NEM/Participant_Information/NEM-Registration" \
-                   "-and-Exemption-List.xls "
-        self._xls_file = tempfile.gettempdir() + "/nem_unit.xls"
+                   "-and-Exemption-List.xls"
+        self._xls_file = tempfile.gettempdir() + "/nem_unit.xlsx"
         self._conn = self._connect_to_db()
         self._cursor = self._conn.cursor()
 
     @check_error
     def _connect_to_db(self):
-        conn = sqlite3.connect("/data/database.sqlite")
+        conn = sqlite3.connect(os.path.join(DATA_DIR, "database.sqlite"))
         logger.info("Connected to DB successfully")
         return conn
 
@@ -68,8 +68,8 @@ class UnitID:
     def _process_xls(self):
         self._df = pd.read_excel(
             self._xls_file,
-            sheet_name=3,
-            engine="xlrd",
+            sheet_name=4,
+            engine="openpyxl",
         )
         if DEBUG:
             logger.debug(f"{self.__class__.__name__} - {self._df}")

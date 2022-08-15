@@ -142,3 +142,4 @@ cython_debug/
 *file_store
 src/file_store.db
 data.sql
+.data/
