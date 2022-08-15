@@ -10,7 +10,7 @@ from load_env import INFLUX_URL, INFLUX_TOKEN, INFLUX_ORG, INFLUX_BUCKET
 s = sched.scheduler(time.time, time.sleep)
 
 
-def acquire_and_process_nemweb(influx_client):
+def acquire_and_process_nemweb(influx_client: influx.InfluxDB):
     nemweb_load_page = nemweb.NemWebLoads("Reports/Current/Dispatch_SCADA/")
     nemweb_solar_page = nemweb.NemWebSolar("Reports/Current/ROOFTOP_PV/ACTUAL/")
     nemweb_demand_page = nemweb.NemWebDemand("Reports/Current/Operational_Demand/ACTUAL_HH/")

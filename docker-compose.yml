@@ -18,7 +18,7 @@ services:
       - $HOME/docker/nemweb/influxdb2:/var/lib/influxdb2
 
   nemweb-scraper:
-    build: .
+    image: ghcr.io/samjwillis97/nemwebscraper:main
     container_name: nemweb-scraper
     depends_on:
       -  influxdb
@@ -32,3 +32,18 @@ services:
       INFLUX_BUCKET: $INFLUX_BUCKET
       INFLUX_URL: $INFLUX_URL
       INFLUX_TOKEN: $INFLUX_TOKEN
+
+  nemweb-api:
+    image: ghcr.io/samjwillis97/nemwebgoapi:main
+    container_name: nemweb-api
+    volumes:
+      - $HOME/docker/nemweb/scraper:/data
+    ports:
+      - "$API_PORT:$API_PORT"
+    environment:
+      INFLUX_URL: $INFLUX_URL
+      INFLUX_TOKEN: $INFLUX_TOKEN
+      INFLUX_ORG: $INFLUX_ORG
+      INFLUX_BUCKET: $INFLUX_BUCKET
+      API_PORT: $API_PORT
+      LOG_LEVEL: $LOG_LEVEL
